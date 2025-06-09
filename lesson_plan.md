@@ -21,11 +21,8 @@
 
 ## 1. Lab Environment Setup
 
-### Learning Objectives
-- Ensure all students have the required access and information before starting the lab.
-- Set up the Meraki Dashboard, API key, and Google Sheets server URL.
 
-### Overview / Learning Content
+### Overview
 Before you begin, you need access to the Meraki Dashboard, an API key, and a Google Sheets server URL for logging and integration. These resources are important for completing the hands-on exercises in this lab.
 
 ### Step-by-Step Instructions
@@ -52,7 +49,7 @@ Before you begin, you need access to the Meraki Dashboard, an API key, and a Goo
 - Recognize the difference between webhooks and traditional polling.
 - Identify the structure of a Meraki webhook payload.
 
-### Overview / Learning Content
+### Overview
 Webhooks are a powerful and lightweight solution to send messages to a remote service using HTTP/HTTPS protocols. These messages can be broadcasted to communication channels, trigger automation events, or be stored in a database. Unlike polling, webhooks provide real-time notifications.
 
 When Meraki triggers a webhook alert, it sends a JSON payload containing a set of standard properties. Understanding these properties is important for building reliable automations, integrations, and monitoring solutions.
@@ -110,22 +107,21 @@ When Meraki triggers a webhook alert, it sends a JSON payload containing a set o
 
 ## Postman Setup
 
-**Objective:** Ensure all students can use Postman with the Meraki API and webhooks.
+**Objective:** Ensure you can use Postman with the Meraki API and webhooks.
 
 **Step-by-Step:**
 1. **Import the Meraki Postman Collection:**
-   - Download from [Meraki Postman Collection](https://documenter.getpostman.com/view/897512/SVfRtnU7?version=latest) or use the import link provided by your instructor.
-   - In Postman, click **Import** and select the collection file or paste the URL.
+   - Download from [Meraki Postman Collection](https://documenter.getpostman.com/view/897512/SzYXYfmJ) or use the import link provided by your instructor.
+   - When the Postman webpage loads, click **Run in Postman** to run the collection locally on your lab computer.
 2. **Set the `{{apiKey}}` Environment Variable:**
    - In Postman, go to **Environments** and create a new environment (e.g., "Meraki Lab").
    - Add a variable named `apiKey` and paste your Meraki API key as the value.
    - Select this environment before sending requests.
 3. **Import the Webhook Samples Collection:**
-   - Download or import the webhook samples collection as provided by your instructor or from the [Webhook Custom Template collection](https://github.com/meraki/webhook-payload-templates).
+   - Download or import the webhook samples collection as provided by your instructor or from the [Meraki Webhook Samples Collection](https://documenter.getpostman.com/view/897512/SVfRtnU7?version=latest).
 4. **Set the `{{webhook-url}}` Environment Variable:**
    - In your environment, add a variable named `webhook-url` and set it to your webhook receiver URL (e.g., your webhook.site or Google Sheets Apps Script URL).
-5. **Test a Request:**
-   - Use the collection to send a test webhook or ping, and verify you receive data at your webhook receiver.
+
 
 ---
 
@@ -135,7 +131,7 @@ When Meraki triggers a webhook alert, it sends a JSON payload containing a set o
 - Configure a webhook receiver using webhook.site.
 - Add and test a receiver in the Meraki Dashboard.
 
-### Overview / Learning Content
+### Overview
 A webhook receiver is a service or endpoint that listens for incoming webhook notifications. For testing and learning, [webhook.site](https://webhook.site/) provides a simple way to receive and inspect webhook payloads sent from Meraki. This helps you verify that your webhooks are working and lets you see the exact data being sent.
 
 ### Step-by-Step Instructions
@@ -192,7 +188,7 @@ A webhook receiver is a service or endpoint that listens for incoming webhook no
 - Understand the difference between included and custom webhook templates.
 - Preview and compare the default template output in Meraki.
 
-### Overview / Learning Content
+### Overview
 Meraki provides a set of included (default) webhook templates that define the structure and content of webhook payloads. These templates cannot be edited, but you can use them as a starting point for your own custom templates. Previewing these templates helps you understand the default payload structure and how it changes for different alert types or integrations (e.g., Webex, Slack).
 
 ### Step-by-Step Instructions
@@ -230,7 +226,7 @@ Meraki provides a set of included (default) webhook templates that define the st
 - Learn the basics of Liquid template syntax: variables, tags, filters.
 - Build and test a custom webhook template in Meraki.
 
-### Overview / Learning Content
+### Overview
 Meraki uses the [Liquid template language](https://shopify.github.io/liquid/) to let you customize webhook payloads. Custom templates allow you to tailor the webhook data to your needs, including formatting, logic, and extracting specific fields. You can use variables, control flow, and filters to create powerful and flexible payloads.
 
 **Key Liquid Concepts:**
@@ -245,41 +241,59 @@ Meraki uses the [Liquid template language](https://shopify.github.io/liquid/) to
    
    <img src="images/webhook-template-editor-custom-template.png" height=500>
 
-#### Example Custom Template
+#### Example Custom Template (with Key Liquid Concepts)
 ```liquid
 {
   "version": "0.2",
-  "webhooktest": "mywebhooktest_static_string",
-  "organizationName": "{{organizationName}}",
-  "networkName": "{{networkName}}",
-  "deviceName": "{{deviceName}}",
-  "deviceModel": "{{deviceModel}}",
-  "alertType": "{{alertType}}",
+  "organizationName": "{{ organizationName }}",
+  "networkName": "{{ networkName }}",
+  "alertType": "{{ alertType }}",
+  "alertTypeId": "{{ alertTypeId }}",
+  "is_critical": "{% if alertLevel == 'critical' %}yes{% else %}no{% endif %}",
+  "alert_keys": "{{ alertData | keys | join: ', ' }}",
   "alertData": {{ alertData | jsonify }}
 }
 ```
-**Rendered Output:**
+**Rendered Output Example:**
 ```json
 {
   "version": "0.2",
-  "webhooktest": "mywebhooktest_static_string",
-  "organizationName": "Acme Corp",
+  "organizationName": "My organization",
   "networkName": "Main Office",
-  "deviceName": "SWITCH-1",
-  "deviceModel": "MS120-8LP",
-  "alertType": "APs went down",
-  "alertData": {"mac": "00:11:22:33:44:55", "rssi": -94}
+  "alertType": "Bluetooth Clients have become visible",
+  "alertTypeId": "bluetooth_in",
+  "is_critical": "no",
+  "alert_keys": "mac, name, rowStartedAt, bluetoothClientId, rssi, seenAt",
+  "alertData": {
+    "mac": "00:11:22:33:44:55",
+    "name": "",
+    "rowStartedAt": {
+      "millisFromEpoch": 1563208308228
+    },
+    "bluetoothClientId": "0000000000000000",
+    "rssi": -94,
+    "seenAt": {
+      "millisFromEpoch": 1563519260925
+    }
+  }
 }
 ```
 
 #### Custom Headers
-You can define custom REST headers under the **Liquid Headers** tab.
+You can add several custom REST headers under the **Liquid Headers** tab. These are often used for authentication (such as API keys or Bearer tokens) and for identifying your application.
 
-<img src="images/we-headers.png" height=200>
+1. In the **Webhook Data** tab, set a temporary shared secret for testing. This value is configurable and will be used in your template as `{{sharedSecret}}`.
+2. Switch to the **Liquid Headers** tab. Add the desired headers. For example, you can create an `Authentication` header with the value `Bearer {{sharedSecret}}` to simulate Bearer token authentication. You can also add a `user-agent` header to identify your application.
+3. Press the **Generate Preview** button to see the resulting headers with your test values substituted in.
+4. You can send a webhook to your test site (such as webhook.site) to verify that the headers are included as expected.
 
-4. Test and observe the result:
-   
-   <img src="images/webhooksite-outcome-custom.png" height=200>
+> **Note:** When creating a real webhook receiver, you must specify the appropriate `sharedSecret` value so that authentication works as intended.
+
+<img src="images/webhook-editor-sharedsecret.png" height=200>
+
+Test and observe the result:
+
+<img src="images/webhook-editor-sharedsecret-preview.png" height=200>
 
 ### Success Criteria
 - I can create and edit a custom webhook template using Liquid syntax.
@@ -294,7 +308,7 @@ You can define custom REST headers under the **Liquid Headers** tab.
 - Test different alert types and use advanced Liquid features.
 - Use logic, filters, and array/object handling in Liquid templates.
 
-### Overview / Learning Content
+### Overview
 Advanced Liquid features allow you to create dynamic and context-aware webhook payloads. You can use logic (if/else), capture computed values, extract nested data, and work with arrays and objects. This enables you to format output based on alert type or data, and to create more useful and readable notifications.
 
 **Key Advanced Techniques:**
@@ -314,12 +328,13 @@ Advanced Liquid features allow you to create dynamic and context-aware webhook p
 #### Example: Using `capture` and `if/else`
 ```liquid
 {% capture summary %}
-  {{ alertType }} on {{ deviceName }} at {{ occurredAt | date: '%H:%M' }}
+  {{ alertType }} on {{ deviceSerial }} at {{ occurredAt | date: '%H:%M' }}
 {% endcapture %}
 {
   "summary": "{{ summary | strip }}",
   "severity": "{% if alertLevel == 'critical' %}CRITICAL{% else %}Normal{% endif %}",
-  "alertType": "{{ alertType }}"
+  "alertType": "{{ alertType }}",
+  "alertTypeId":"{{ alertTypeId }}"
 }
 ```
 
@@ -346,12 +361,12 @@ Advanced Liquid features allow you to create dynamic and context-aware webhook p
 - Use advanced Liquid features (e.g., `capture`, `json_markdown`).
 - Send a webhook payload to a Webex room with Markdown formatting.
 
-### Overview / Learning Content
+### Overview
 Webex supports incoming webhooks that allow you to send messages directly to a Webex space. This is useful for alerting teams in real time when important events occur in your Meraki network. By using advanced Liquid features, you can format your webhook payloads with Markdown for better readability in Webex.
 
 ### Step-by-Step Instructions
 1. **Set up an Incoming Webhook in Webex:**
-   - Go to the [Webex Incoming Webhooks App Hub page](https://apphub.webex.com/messaging/applications/incoming-webhooks-cisco-systems-38054) and click **Connect**.
+   - Go to the [Webex Incoming Webhooks App Hub page](https://apphub.webex.com/applications/incoming-webhooks-cisco-systems-38054-23307-75252) and click **Connect**.
    - Name your webhook and select the Webex space where messages should be sent.
    - Note the webhook URL provided (it will look like `https://webexapis.com/v1/webhooks/incoming/<YOUR DYNAMIC URL>`).
    
@@ -401,7 +416,7 @@ Alert Data
 ```
 
 3. **No Custom Headers Required:**
-   - The headers for this integration can be left empty (`{}`).
+   - The headers for this integration can be left empty.
 
 4. **Configure the Webhook Receiver:**
    - In Meraki, add a new HTTP server using your Webex webhook URL as the receiver.
@@ -423,7 +438,7 @@ Alert Data
 - Understand what a callback is and how it differs from a regular webhook alert.
 - Recognize the structure of a Meraki callback payload.
 
-### Overview / Learning Content
+### Overview
 A callback is a webhook sent by Meraki when a long-running API operation (like a ping or action batch) completes. Instead of polling for results, you receive a notification when the operation is done. Callback payloads have a different structure from alert payloads and are designed to provide the results of asynchronous operations.
 
 **Key Points:**
@@ -481,11 +496,11 @@ A callback is a webhook sent by Meraki when a long-running API operation (like a
 - Use Postman to send a ping request to Meraki with a callback URL.
 - Understand the callback payload and how to monitor asynchronous operations.
 
-### Overview / Learning Content
-When you use the Meraki API with Live Tools such as "ping" or "reboot", you can provide a callback URL. Instead of waiting for the operation to finish, Meraki will send the results to your callback URL (e.g., webhook.site) when the operation completes. This is ideal for long-running or asynchronous tasks. The callback payload will contain the results of the operation.
+### Overview
+When you use the Meraki API with Live Tools such as "ping" or "cableTest", you can provide a callback URL. Instead of waiting for the operation to finish, Meraki will send the results to your callback URL (e.g., webhook.site) when the operation completes. This is ideal for long-running or asynchronous tasks. The callback payload will contain the results of the operation.
 
 ### Step-by-Step Instructions
-1. In Postman, create a request to the following endpoint:
+1. In Postman, create a request to the following endpoint (or use the provided request in the Meraki API collection):
    - `POST /devices/{serial}/liveTools/ping`
 2. Use the following sample request body, replacing the callback URL with your own (e.g., from webhook.site or Google Sheets):
 
@@ -543,7 +558,7 @@ When you use the Meraki API with Live Tools such as "ping" or "reboot", you can 
 - Use Postman to send an action batch request to Meraki with a callback URL.
 - Understand the callback payload and how to monitor bulk asynchronous operations.
 
-### Overview / Learning Content
+### Overview
 Action Batches allow you to execute multiple API actions in a single request. By providing a callback URL, you can receive a notification when the batch is processed, including the results for each action. This is especially useful for bulk configuration changes and triggering multi-step automation routines. The callback payload will contain the status and results for each action in the batch.
 
 ### Step-by-Step Instructions
@@ -629,7 +644,7 @@ Action Batches allow you to execute multiple API actions in a single request. By
 - Integrate Meraki webhooks with Google Sheets for logging and analysis.
 - Deploy a Google Apps Script as a webhook receiver.
 
-### Overview / Learning Content
+### Overview
 You can use Google Sheets as a simple and effective webhook receiver to log and analyze Meraki webhook and callback data. By deploying a Google Apps Script as a web app, you can receive HTTP POST requests and automatically append the data to your spreadsheet for easy tracking and reporting.
 
 ### Step-by-Step Instructions
@@ -643,7 +658,7 @@ You can use Google Sheets as a simple and effective webhook receiver to log and 
 function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var data = JSON.parse(e.postData.contents);
-  // Optionally, extract specific fields for columns
+  // Extracts specific fields for the table columns
   sheet.appendRow([
     new Date(),
     data.alertId || data.callbackId || "",
@@ -693,7 +708,7 @@ function doPost(e) {
 - Send a webhook alert with a custom image URL to Google Sheets.
 - Create and test a custom Liquid template that includes dynamic content.
 
-### Overview / Learning Content
+### Overview
 This final challenge brings together all the skills you've learned in the lab. You'll send both alert and callback data to your Google Sheets webhook receiver, and create a custom template that includes a dynamic image URL using Liquid. This exercise demonstrates how to combine Meraki webhooks, callbacks, and external integrations for real-world automation and monitoring.
 
 ### Step-by-Step Instructions
