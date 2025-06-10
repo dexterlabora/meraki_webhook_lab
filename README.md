@@ -704,12 +704,12 @@ function doPost(e) {
 ## 12. Final Challenge: Alerts, Callbacks, and Custom Images Message to Google Sheets
 
 ### Learning Objectives
-- Send a webhook callback for a ping and an action batch to Google Sheets.
-- Send a webhook alert with a custom image URL to Google Sheets.
 - Create and test a custom Liquid template that includes dynamic content.
+- Send a webhook alert with a custom image URL to Google Sheets.
+- Send a webhook callback for a ping and an action batch to Google Sheets.
 
 ### Overview
-This final challenge brings together all the skills you've learned in the lab. You'll send both alert and callback data to your Google Sheets webhook receiver, and create a custom template that includes a dynamic image URL using Liquid. This exercise demonstrates how to combine Meraki webhooks, callbacks, and external integrations for real-world automation and monitoring.
+This final challenge brings together all the skills you've learned in the lab. You'll send both alert and callback data to your Google Sheets webhook receiver, and create a custom template that includes a dynamic image URL using Liquid. This exercise demonstrates how to combine Meraki webhooks, and external integrations for real-world automation and monitoring.
 
 ### Step-by-Step Instructions
 1. **Create a Custom Template with a Dynamic Image URL**
@@ -736,7 +736,6 @@ This final challenge brings together all the skills you've learned in the lab. Y
 
 4. **Send a Webhook Callback to Google Sheets**
    - Send a webhook callback for a ping or action batch to your Google Sheets receiver.
-   - Adjust your template as needed for callback data (note: there is no `alertData` for a callback).
 
 5. **Verify the Results**
    - Check your Google Sheet to ensure all relevant data, including the custom image URL, is logged.
